@@ -19,6 +19,7 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
+        "hemispheres": hemispheres(browser),
         "last_modified": dt.datetime.now()
     }
 
@@ -26,7 +27,7 @@ def scrape_all():
     browser.quit()
     return data
 
-
+# mars news function
 def mars_news(browser):
 
     # Scrape Mars News
@@ -54,7 +55,7 @@ def mars_news(browser):
 
     return news_title, news_p
 
-
+# featured image function
 def featured_image(browser):
     # Visit URL
     url = 'https://data-class-jpl-space.s3.amazonaws.com/JPL_Space/index.html'
@@ -81,6 +82,7 @@ def featured_image(browser):
 
     return img_url
 
+# mars facts functions
 def mars_facts():
     # Add try/except for error handling
     try:
@@ -96,6 +98,32 @@ def mars_facts():
 
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html(classes="table table-striped")
+
+# hemisphere function
+def hemispheres(browser):
+    # Use browser to visit the URL 
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
+    # Create a list to hold the images and titles.
+    hemisphere_image_urls = []
+    # 3. Write code to retrieve the image urls and titles for each hemisphere.
+    links = browser.find_by_css('a.product-item img')
+
+    for i in range(len(links)):
+        # create an empty dictionary for image and title of each hemisphere.
+        hemisphere = {}
+        # find image and click to next page.
+        browser.find_by_css('a.product-item img')[i].click()
+        # find sample image and extract.
+        sample_elem = browser.links.find_by_text('Sample').first
+        hemisphere['img_url'] = sample_elem['href']
+        # find title.
+        hemisphere['title'] = browser.find_by_css('h2.title').text
+        # append list to dictionary.
+        hemisphere_image_urls.append(hemisphere)
+        # navigate back to starter page.
+        browser.back()
+    return hemisphere_image_urls
 
 if __name__ == "__main__":
     app.run()
